@@ -23,7 +23,7 @@ public class CityDaoJDBC implements CityDao {
 	public static final String DELETE = "DELETE FROM city WHERE ID = ?";
 	
 	
-	public City setGeneratedKeys(City city) {
+	public City add(City city) {
 		
 		Connection connection = null;
 		PreparedStatement statement = null;
@@ -149,21 +149,6 @@ public class CityDaoJDBC implements CityDao {
 	}
 
 	@Override
-	public City add(City city) {
-		
-		try(Connection connection = Database.getConnection();
-				PreparedStatement statement = createAddByInsertStatement(connection, city);) {
-			
-			statement.execute();
-			
-		} catch (SQLException ex) {
-			ex.printStackTrace();
-		}
-		
-		return city;
-	}
-
-	@Override
 	public City update(City city) {
 		
 		try(Connection connection = Database.getConnection();
@@ -181,19 +166,19 @@ public class CityDaoJDBC implements CityDao {
 	@Override
 	public int delete(City city) {
 		
-		int cityToDelete = city.getId();
+		int rowsDeleted = 0;
 		
 		try(Connection connection = Database.getConnection();
 				PreparedStatement statement = createDeleteStatement(connection, city);) {
 			
-			statement.setInt(1, cityToDelete);
-			statement.execute();
+			statement.setInt(1, city.getId());
+			rowsDeleted = statement.executeUpdate();
 			
 		} catch (SQLException ex) {
 			ex.printStackTrace();
 		}
 		
-		return cityToDelete;
+		return rowsDeleted;
 	}
 
 	private PreparedStatement createFindByIdStatement(Connection connection, int id) throws SQLException {
@@ -217,19 +202,6 @@ public class CityDaoJDBC implements CityDao {
 	private PreparedStatement createFindByAllStatement(Connection connection) throws SQLException {
 	        PreparedStatement statement = connection.prepareStatement(FIND_BY_ALL);
 	        return statement;
-    }
-	 
-    private PreparedStatement createAddByInsertStatement(Connection connection, City city) throws SQLException {
-    	    String name = null;
-    	    String countryCode = null;
-    	    String district = null;
-    	    int population = 0;
-    	    PreparedStatement statement = connection.prepareStatement(INSERT);
-    	    statement.setString(1, city.setName(name));
-    	    statement.setString(2, city.setCountryCode(countryCode));
-    	    statement.setString(3, city.setDistrict(district));
-    	    statement.setInt(4, city.setPopulation(population));
-    	    return statement;
     }
     
 	private PreparedStatement createUpdateStatement(Connection connection, City city) throws SQLException {
